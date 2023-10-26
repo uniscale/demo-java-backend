@@ -1,11 +1,13 @@
 package com.uniscale.account;
 
 import com.uniscale.sdk.Platform;
+import com.uniscale.sdk.core.PlatformSession;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import uniscaledemo.account.Patterns;
 import uniscaledemo.account.account.UserFull;
 
@@ -13,6 +15,11 @@ import uniscaledemo.account.account.UserFull;
 public class AccountApplication {
 
   public static void main(String[] args) {
+    SpringApplication.run(com.uniscale.account.AccountApplication.class, args);
+  }
+
+  @Bean
+  public PlatformSession platformSession() {
     // Create in memory cache of users
     var users = new HashMap<UUID, UserFull>();
 
@@ -38,7 +45,7 @@ public class AccountApplication {
                                       newUserIdentifier,
                                       UserFull.builder()
                                           .userIdentifier(newUserIdentifier)
-                                          .handle("input")
+                                          .handle(input)
                                           .build());
                                   return users.get(newUserIdentifier);
                                 }))
@@ -52,21 +59,16 @@ public class AccountApplication {
                         .interceptRequest(
                             Patterns.account.searchAllUsers.allRequestUsages,
                             Patterns.account.searchAllUsers.handleDirect(
-                                (input, ctx) -> {
-                                  return users.values().stream()
-                                      .filter(
-                                          u ->
-                                              u.getHandle()
-                                                  .toLowerCase()
-                                                  .contains(input.toLowerCase()))
-                                      .toList();
-                                })))
+                                (input, ctx) ->
+                                    users.values().stream()
+                                        .filter(
+                                            u ->
+                                                u.getHandle()
+                                                    .toLowerCase()
+                                                    .contains(input.toLowerCase()))
+                                        .toList())))
             .build();
 
-    var session = sessionFuture.join();
-
-    // Accept gateway stuff from api.
-
-    SpringApplication.run(com.uniscale.account.AccountApplication.class, args);
+    return sessionFuture.join();
   }
 }
