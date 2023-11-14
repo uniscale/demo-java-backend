@@ -1,11 +1,7 @@
 package com.uniscale.account;
 
 import com.uniscale.sdk.core.PlatformSession;
-import com.uniscale.sdk.core.Result;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AccountController {
@@ -16,8 +12,9 @@ public class AccountController {
   }
 
   @PostMapping("/api/service-to-module/{featureId}")
-  public Result<Object> handleGatewayRequest(
+  @CrossOrigin(origins = "*")
+  public String handleGatewayRequest(
       @PathVariable("featureId") String featureId, @RequestBody String gatewayRequest) {
-    return session.acceptGatewayRequest(gatewayRequest).join();
+    return session.acceptGatewayRequest(gatewayRequest).join().toJson();
   }
 }
